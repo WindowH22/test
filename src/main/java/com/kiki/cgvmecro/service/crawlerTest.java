@@ -9,15 +9,13 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
 @Slf4j
-public class crawler {
+public class crawlerTest {
 
     @Scheduled(cron = "* * * * * *") // 매 1초마다 실행
     public void noticeCrawler() throws Exception {
@@ -30,12 +28,14 @@ public class crawler {
         ChromeOptions options = new ChromeOptions();
 
         options.addArguments("--disable-popup-blocking");   // 팝업 안띄움
-        options.addArguments("headless");   // 브라우저 안띄움
+//        options.addArguments("headless");   // 브라우저 안띄움
         options.addArguments("--disable-gpu");  // gpu 비활성화
 //        options.addArguments("--blink-settings=imagesEnabled=false");   // 이미지 다운 안받음
         options.addArguments("--remote-allow-origins=*");
         WebDriver driver = new ChromeDriver(options);
+//        WebDriver driver = new ChromeDriver();
 
+        // WebDriver 가 로드될때까지 10초 기다림
 
 
         driver.get("http://www.cgv.co.kr/ticket/");
@@ -44,7 +44,7 @@ public class crawler {
         driver.manage().addCookie(loginCookie);
         driver.get("http://www.cgv.co.kr/ticket/");
 
-        WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofMillis(1200));
+        WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(3));
 
         // 해당 XPath를 사용하여 요소 찾기 (기다리며 찾기)
 
@@ -54,17 +54,19 @@ public class crawler {
 
         webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"movie_list\"]/ul/li[1]/a"))).click();
         // imax
-        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"sbmt_imax\"]/a"))).click();
+        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"sbmt_all\"]/a"))).click();
+
         //지역 선택
         webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"theater_area_list\"]/ul/li[2]/a"))).click();
+
         // 용아맥
-        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"theater_area_list\"]/ul/li[2]/div/ul/li[@theater_cd='0013']/a"))).click();
+        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"theater_area_list\"]/ul/li[2]/div/ul/li[12]/a"))).click();
 
         WebElement ulElement = webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id='date_list']/ul")));
 
         // 해당 ul 요소 내에서 date 속성이 20240324인 li 요소 찾기
         while(true){
-            webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//li[@date='20240324']"))).click();
+            webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//li[@date='20240321']"))).click();
 
             // todo: 0324 가 언제뜰지 계속 봀수 있는 함수를 만들어야함
             try {
@@ -85,7 +87,6 @@ public class crawler {
             }
         }
 
-
         // 아이맥스 두번째 시간 클릭
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"ticket\"]/div[2]/div[1]/div[4]/div[2]/div[3]/div[1]/div[1]/ul/li[2]/a"))).click();
 
@@ -95,7 +96,7 @@ public class crawler {
 
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"nop_group_adult\"]/ul/li[3]/a"))).click();
 
-        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"seats_list\"]/div[1]/div[8]/div[3]/div/div[6]/a"))).click();
+//        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"seats_list\"]/div[1]/div[8]/div[3]/div/div[6]/a"))).click();
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
 
@@ -117,9 +118,9 @@ public class crawler {
             // alert 창 닫기 (확인 버튼 클릭)
             alert.accept();
         }
-        catch (NoAlertPresentException e) {
-            // alert가 없는 경우에는 아무 작업도 하지 않고 다음 동작을 이어감
-            log.info(e.getMessage());
+         catch (NoAlertPresentException e) {
+        // alert가 없는 경우에는 아무 작업도 하지 않고 다음 동작을 이어감
+             log.info(e.getMessage());
 
         } catch (TimeoutException e){
             log.info(e.getMessage());
@@ -138,7 +139,7 @@ public class crawler {
 
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"lp_card_month\"]"))).sendKeys("09");
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"lp_card_year\"]"))).sendKeys("28");
-        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"lp_card_pw\"]"))).sendKeys("");
+        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"lp_card_pw\"]"))).sendKeys("11");
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"lp_card_ssn\"]"))).sendKeys("970413");
 
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"tnb_step_btn_right\"]"))).click();
@@ -151,7 +152,6 @@ public class crawler {
         // 최종 결제 승인
 //        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[4]/div[3]/a[1]"))).click();
 
-
 //         WebDriver 종료
 //        driver.quit();
 
@@ -161,60 +161,37 @@ public class crawler {
     public void findSeat(WebDriverWait webDriverWait, WebDriver driver){
 
         List<String> seatXpath = new ArrayList<>();
-//*[@id="seats_list"]/div[1]/div[8]/div[3]/div/div[7]/a//*[@id="seats_list"]/div[1]/div[8]/div[3]/div/div[7]/a
-        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[12]/div[4]/div/div[7]/a"); // L열 22,23
+        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[7]/div[2]/div/div[3]/a"); //
+
+        /*seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[12]/div[4]/div/div[7]/a"); // L열 22,23
         seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[11]/div[4]/div[2]/div[3]/a"); // K열 22,23
         seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[10]/div[4]/div/div[7]/a"); // J열 22,23
         seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[9]/div[4]/div/div[7]/a"); // I열 22,23
-        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[8]/div[3]/div/div[7]/a"); // H열 22, 23
-        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[7]/div[3]/div/div[7]/a"); // G열 22,    23
-        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[13]/div[4]/div/div[7]/a"); // M열 22, 23
-
 
         seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[12]/div[4]/div/div[9]/a"); // L열 24,25
         seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[11]/div[4]/div[2]/div[5]/a"); // K열 24,25
         seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[10]/div[4]/div/div[9]/a"); // J열 24,25
         seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[9]/div[4]/div/div[9]/a"); // I열 24,25
 
-
-        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[8]/div[3]/div/div[9]/a"); // H열 24,25
-        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[7]/div[3]/div/div[9]/a"); // G열 24,25
-        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[13]/div[4]/div/div[9]/a"); // M열 24,25
-
         seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[12]/div[4]/div/div[5]/a"); // L열 20,21
         seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[11]/div[4]/div[2]/div[1]/a"); // K열 20,21
         seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[10]/div[4]/div/div[5]/a"); // J열 20,21
-        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[9]/div[4]/div/div[5]/a"); // I열 20,21
-
-        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[8]/div[3]/div/div[5]/a"); // H열 20, 21
-
-        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[7]/div[3]/div/div[5]/a"); // G열 20, 21
-        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[13]/div[4]/div/div[5]/a"); // M열 20, 21
+        seatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[9]/div[4]/div/div[5]/a"); // I열 20,21*/
         List<String> unSeatXpath = new ArrayList<>();
 
+/*
         unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[12]/div[4]/div[2]/div[1]/a"); // L열 선택해제할때
         unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[11]/div[4]/div[3]/div[1]/a"); //  K열 선택해제
         unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[10]/div[4]/div[2]/div[1]/a"); // J열 선택해제
         unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[9]/div[4]/div[2]/div[1]/a"); // I열 선택해제
-        unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[8]/div[3]/div[2]/div[1]/a"); // H열 선택해제
-        unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[7]/div[3]/div[2]/div[1]/a"); // G열 선택해제
-        unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[13]/div[4]/div[2]/div[1]/a"); // M열 선택해제
-
         unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[12]/div[4]/div[2]/div[1]/a"); // L열 선택해제할때
         unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[11]/div[4]/div[3]/div[1]/a"); //  K열 선택해제
         unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[10]/div[4]/div[2]/div[1]/a"); // J열 선택해제
         unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[9]/div[4]/div[2]/div[1]/a"); // I열 선택해제
-        unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[8]/div[3]/div[2]/div[1]/a"); // H열 선택해제
-        unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[7]/div[3]/div[2]/div[1]/a"); // G열 선택해제
-        unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[13]/div[4]/div[2]/div[1]/a"); // M열 선택해제
-
         unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[12]/div[4]/div[2]/div[1]/a"); // L열 선택해제할때
         unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[11]/div[4]/div[2]/div[1]/a"); //  K열 선택해제
         unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[10]/div[4]/div[2]/div[1]/a"); // J열 선택해제
-        unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[9]/div[4]/div[2]/div[1]/a"); // I열 선택해제
-        unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[8]/div[3]/div[2]/div[1]/a"); // H열 선택해제
-        unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[7]/div[3]/div[2]/div[1]/a"); // G열 선택해제
-        unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[13]/div[4]/div[2]/div[1]/a"); // M열 선택해제
+        unSeatXpath.add("//*[@id=\"seats_list\"]/div[1]/div[9]/div[4]/div[2]/div[1]/a"); // I열 선택해제*/
 
 
 
@@ -228,33 +205,25 @@ public class crawler {
                 webDriverWait.until(ExpectedConditions.alertIsPresent());
                 Alert alert = driver.switchTo().alert();
                 String alertMessage = alert.getText(); // alert 창의 메시지 가져오기
-                log.info("Alert message: " + alertMessage);
+                System.out.println("Alert message: " + alertMessage);
 
                 // alert 창 닫기 (확인 버튼 클릭)
                 alert.accept();
-
                 // 다시 눌러서 선택해제
                 webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(unSeatXpath.get(i)))).click();
             } catch (NoAlertPresentException e) {
                 // alert가 없는 경우에는 아무 작업도 하지 않고 다음 동작을 이어감
-                log.info(e.getMessage());
-                webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"tnb_step_btn_right\"]"))).click();
+//                webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"tnb_step_btn_right\"]"))).click();
                 break;
             }catch (TimeoutException e){
 //                webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"tnb_step_btn_right\"]"))).click();
-                log.info(e.getMessage());
-
-
-                // 만약 선택된 후라면? -> 다시 눌러서 선택해제;
-                webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(unSeatXpath.get(i)))).click();
+                break;
             }
         }
     }
 
-
-
     public static void main(String[] args) throws Exception {
-        crawler ls = new crawler();
+        crawlerTest ls = new crawlerTest();
         ls.noticeCrawler();
     }
 }
