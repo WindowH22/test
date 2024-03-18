@@ -30,7 +30,7 @@ public class crawler {
         ChromeOptions options = new ChromeOptions();
 
         options.addArguments("--disable-popup-blocking");   // 팝업 안띄움
-        options.addArguments("headless");   // 브라우저 안띄움
+//        options.addArguments("headless");   // 브라우저 안띄움
         options.addArguments("--disable-gpu");  // gpu 비활성화
 //        options.addArguments("--blink-settings=imagesEnabled=false");   // 이미지 다운 안받음
         options.addArguments("--remote-allow-origins=*");
@@ -44,7 +44,7 @@ public class crawler {
         driver.manage().addCookie(loginCookie);
         driver.get("http://www.cgv.co.kr/ticket/");
 
-        WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofMillis(1200));
+        WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofMillis(10000));
 
         // 해당 XPath를 사용하여 요소 찾기 (기다리며 찾기)
 
@@ -60,14 +60,13 @@ public class crawler {
         // 용아맥
         webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"theater_area_list\"]/ul/li[2]/div/ul/li[@theater_cd='0013']/a"))).click();
 
-        WebElement ulElement = webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id='date_list']/ul")));
-
         // 해당 ul 요소 내에서 date 속성이 20240324인 li 요소 찾기
         while(true){
-            webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//li[@date='20240324']"))).click();
 
-            // todo: 0324 가 언제뜰지 계속 봀수 있는 함수를 만들어야함
             try {
+                webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//li[@date='20240324']"))).click();
+                int count = 0;
+                // todo: 0324 가 언제뜰지 계속 봀수 있는 함수를 만들어야함
                 // alert가 뜰 때까지 대기
                 webDriverWait.until(ExpectedConditions.alertIsPresent());
 
@@ -76,12 +75,21 @@ public class crawler {
                 // alert 창 닫기 (확인 버튼 클릭)
                 alert.dismiss();
                 webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"theater_area_list\"]/ul/li[2]/div/ul/li[@theater_cd='0013']/a"))).click();
+                count ++;
+                if( count % 100 == 0){
+                    log.info(count+"번 째 시도중");
+                }
+
             } catch (NoAlertPresentException e) {
                 // alert가 없는 경우에는 아무 작업도 하지 않고 다음 동작을 이어감
-                System.out.println("ss");
+
+                log.info("경고문이 뜨지 않았습니다.");
                 break;
             } catch (TimeoutException e){
+                log.info("시간이 지나도 경고문이 뜨지 않았습니다.");
                 break;
+            } catch (ElementClickInterceptedException e){
+                log.info("안잡혀요 ㅠㅠㅠ");
             }
         }
 
@@ -109,6 +117,7 @@ public class crawler {
         findSeat(webDriverWait,driver);
 
         // 결제 페이지
+        log.info("결제 페이지 진입");
         try{
             webDriverWait.until(ExpectedConditions.alertIsPresent());
             Alert alert = driver.switchTo().alert();
@@ -149,8 +158,9 @@ public class crawler {
 
 
         // 최종 결제 승인
-//        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[4]/div[3]/a[1]"))).click();
+        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[4]/div[3]/a[1]"))).click();
 
+        log.info("결제 완료 ");
 
 //         WebDriver 종료
 //        driver.quit();
